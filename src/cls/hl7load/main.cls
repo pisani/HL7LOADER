@@ -31,7 +31,7 @@ ClassMethod resetReArm(value)
 XData ProductionDefinition
 {
 <Production Name="hl7load.main" LogGeneralTraceEvents="false">
-  <Description>Test Change.  sample to manage HL7 broadcast to target ports</Description>
+  <Description>Sample to manage HL7 broadcast to target ports</Description>
   <ActorPoolSize>1</ActorPoolSize>
   <Setting Target="Adapter" Name="ReArm All">0</Setting>
   <Item Name="Generate HL7 ORU_R01" Category="" ClassName="hl7load.bs.HL7Generator" PoolSize="1" Enabled="false" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
