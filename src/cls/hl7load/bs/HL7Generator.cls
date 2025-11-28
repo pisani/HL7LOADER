@@ -52,6 +52,7 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
         do ..ProcessMessageBeforeDispatch(.hl7)
         do hl7.%Save()
         
+        
         // Send to all targets with each iteration.
         for i=1:1:$length(..TargetConfigNames,",") {
 	        set target=$piece(..TargetConfigNames,",",i)
@@ -76,15 +77,16 @@ Method ProcessMessageBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message)
 	if ..XDataBlockName = "ORUR01" {
 		// Vary the message sample in xdata block ORUR01
 		
-		do hl7.SetValueAt($translate($zdt($h,3)," -:",""),"PIDgrpgrp(1).ORCgrp(1).OBR:ObservationDateTime")
+		do hl7.SetValueAt($translate($zdt($h,3)," -:",""),"PIDgrpgrp(1).ORCgrpgrp(1).OBR:ObservationDateTime")
 		
 		// Add random results
-        set obx(7)=11+$r(15)
-        set obx(9)=95+$r(5)
-        set obx(10)=50+$r(70)
-        do hl7.SetValueAt(obx(7),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(7).OBX:5")
-        do hl7.SetValueAt(obx(9),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(9).OBX:5")
-        do hl7.SetValueAt(obx(10),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(10).OBX:5")
+        set obx(3)=8+$r(5)
+        set obx(5)=60+$r(15)
+        set obx(6)=40+$r(20)
+        do hl7.SetValueAt(obx(3),"PIDgrpgrp(1).ORCgrpgrp(1).OBXgrp(3).OBX:5")
+        do hl7.SetValueAt(obx(5),"PIDgrpgrp(1).ORCgrpgrp(1).OBXgrp(5).OBX:5")
+        do hl7.SetValueAt(obx(6),"PIDgrpgrp(1).ORCgrpgrp(1).OBXgrp(6).OBX:5")
+		
 		
 	}
 }
