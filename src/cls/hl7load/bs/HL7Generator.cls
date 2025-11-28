@@ -1,9 +1,9 @@
-Class hl7load.bs.HL7Generator Extends Ens.BusinessService
+Class ge.bs.HL7Generator Extends Ens.BusinessService
 {
 
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigNames:Basic:selector?multiSelect=1&context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
+Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigNames:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
 
 Property MessageVolume As %Integer(MINVAL = 1) [ InitialExpression = 1 ];
 
@@ -48,14 +48,16 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
         	do hl7.%Save()
         	;w !,mNum," ",hl7.GetValueAt("1:10")
         }
-         
+        
+        do ..ProcessMessageBeforeDispatch(.hl7)
+        do hl7.%Save()
+        
         // Send to all targets with each iteration.
         for i=1:1:$length(..TargetConfigNames,",") {
 	        set target=$piece(..TargetConfigNames,",",i)
         	do ..SendRequestAsync(target,hl7)
         	set ..%SessionId=""
         }
-        
         
     
     } while ..MessageCounter<(..MessageVolume) 
@@ -67,24 +69,24 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
     Quit $$$OK
 }
 
-Method ProcessMessageBeforeDispatch(hl7old As EnsLib.HL7.Message) As EnsLib.HL7.Message
+Method ProcessMessageBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message)
 {
 
 	set currentIteration =..MessageCounter
 	if ..XDataBlockName = "ORUR01" {
 		// Vary the message sample in xdata block ORUR01
 		
+		do hl7.SetValueAt($translate($zdt($h,3)," -:",""),"PIDgrpgrp(1).ORCgrp(1).OBR:ObservationDateTime")
+		
 		// Add random results
-        set obx(1)=11+$r(15)
-        set obx(2)=95+$r(5)
-        set obx(3)=50+$r(70)
-        do hl7.SetValueAt(obx(1),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(1).OBX:5")
-        do hl7.SetValueAt(obx(2),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(2).OBX:5")
-        do hl7.SetValueAt(obx(3),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(3).OBX:5")
+        set obx(7)=11+$r(15)
+        set obx(9)=95+$r(5)
+        set obx(10)=50+$r(70)
+        do hl7.SetValueAt(obx(7),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(7).OBX:5")
+        do hl7.SetValueAt(obx(9),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(9).OBX:5")
+        do hl7.SetValueAt(obx(10),"PIDgrpgrp(1).ORCgrp(1).OBXgrp(10).OBX:5")
 		
 	}
-	
-	return hl7
 }
 
 Method OnStart() As %Status
@@ -201,15 +203,16 @@ IN1|1|HFNIB||NIB Health Fund|Locked Bag 2010^^Newcastle^NSW^2300||+1300 853 530|
 
 XData ORUR01 [ MimeType = application/text ]
 {
- 
-MSH|^~\&|LabSystemA|D227|||20250319100000||ORU^R01|Q3577075326T6038788633||2.4||||||8859/1
-PID|1|AA816402^^^D227^MRN|AA816402^^^D227^MR~AA8571947^^^EMRUPI^CMRN||WARDTRF^MyEdDr^^^^^L||19990425|1||||||||||18984841^^^CD:313339243^CD:91|||||||0
-PD1|||^^0
-PV1|1|E|Emergency^^^D227^^Ambulatory(s)^Northmead OPD||||AA784033856^^^UWMC^MR^UWMC~2348062L^SMITH^MATTHEW^^^^^^A208 RP^P^^^DOCNUM~|||EMG|Emergency^^^^^Ambulatory(s)||||||2348062L^SMITH^MATTHEW^^^^^^A208 RP^P^^^DOCNUM~BNK/RPAH^SMITH^MATTHEW^^^^^^CD:18500574^P^^^DOCUPIN~MED0001190654^SMITH^MATTHEW^^^^^^CD:13639^P^^^DOCDEA~2348064K^SMITH^MATTHEW^^^^^^D227 BK^P^^^DOCNUM~234806^SMITH^MATTHEW^^^^^^CD:18500574^P^^^DOCUPIN~2132033^SMITH^MATTHEW^^^^^^^P^^^Healthe Prescriber Id~25050482^SMITH^MATTHEW^^^^^^^P^^^PRSNLID|E|6563182^^^CD:13644370^VID||||||||||||||||||||D227||Active|||20240404125200
-OBR|1||28530551747^HNAM_RESULT_GROUP_ID|VITALSIGNS Pass1|||20240404125400|||||||||60114881^Alvarez^Tryston^^^^^^^P^^^PRSNLID||||||20240404125529||LAB|Final
-OBX|1|NUM|5812702^Respiratory Rate|9941526049|18|br pm^br pm|10-25^10^25|NORMAL|||Final|||20240404125424||60114881^Alvarez^Tryston^^^^^^^P^^^PRSNLID
-OBX|2|NUM|5846800^SpO2|9941526051|96|%^%|95-100^95^100|NORMAL|||Final|||20240404125424||60114881^Alvarez^Tryston^^^^^^^P^^^PRSNLID
-OBX|3|NUM|5812693^Pulse Rate|9941526055|78|bpm^bpm|50-120^50^120|NORMAL|||Final|||20240404125424||60114881^Alvarez^Tryston^^^^^^^P^^^PRSNLID
+MSH|^~\&|GE IHE Gateway^urn:uuid:bfe754cd-7f41-4732-8f4c-397da53854a0^URN|GEHealthcare|||20181218130806.4160+0000||ORU^R01^ORU_R01|64f3395a-42a0-44e1-9a03-4b5434ced67b-1139|P|2.8|||AL|NE||UNICODE UTF-8|||PCD_DEC_001^IHE PCD^1.3.6.1.4.1.19376.1.6.1.1.1^ISO
+PID|||123456^^^A^MR||LAST4941008^First101^MI||20181218063029.0000+0000|M
+PV1||I|CCU^101^A||||||||||||||||56755^^^^VN
+OBR|1|64f3395a42a044e19a034b5434ced67b1139^GE IHE Gateway^urn:uuid:bfe754cd7f41-4732-8f4c-397da53854a0^URN|64f3395a42a044e19a034b5434ced67b1139^GE IHEGateway^urn:uuid:bfe754cd-7f41-4732-8f4c397da53854a0^URN|182777000^monitoring of patient^SCT|||20181024095654.0313+0000
+OBX|1||69965^MDC_DEV_MON_PHYSIO_MULTI_PARAM_MDS^MDC|1.0.0.0|||||||X
+OBX|2||70666^MDC_DEV_ECG_RESP_VMD^MDC|1.6.0.0|||||||X
+OBX|3|NM|151562^MDC_RESP_RATE^MDC|1.6.0.1|9|{breath}/min^{breath}/min^UCUM|||||R|||||||ZDgLgGhEZp76MXo4^AMBULATORY - XUJ^urn:uuid:bfe754cd-7f41-4732-8f4c-397da53854a0^URN
+OBX|4||69642^MDC_DEV_ANALY_SAT_O2_VMD^MDC|1.22.0.0|||||||X
+OBX|5|NM|150456^MDC_PULS_OXIM_SAT_O2^MDC|1.22.0.1|70|%^%^UCUM|||||R|||||||ZDgLgGhEZp76MXo4^AMBULATORY - XUJ^urn:uuid:bfe754cd-7f41-4732-8f4c397da53854a0^URN
+OBX|6|NM|149530^MDC_PULS_OXIM_PULS_RATE^MDC|1.22.0.2|50|{beat}/min^{beat}/min^UCUM|||||R|||||||ZDgLgGhEZp76MXo4^AMBULATORY -XUJ^urn:uuid:bfe754cd-7f41-4732-8f4c-397da53854a0^URN
 }
 
 }
