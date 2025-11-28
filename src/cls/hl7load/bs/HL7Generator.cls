@@ -3,7 +3,7 @@ Class hl7load.bs.HL7Generator Extends Ens.BusinessService
 
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigName:Basic:selector?multiSelect=0&context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
+Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigNames:Basic:selector?multiSelect=1&context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
 
 Property MessageVolume As %Integer(MINVAL = 1) [ InitialExpression = 1 ];
 
@@ -19,7 +19,7 @@ Property XDataBlockName As %String;
 Property IncrementMessageID As %Boolean [ InitialExpression = 1 ];
 
 /// Receiving HL7 target component
-Property TargetConfigName As %String(MAXLEN = "");
+Property TargetConfigNames As %String(MAXLEN = "");
 
 Property MessageCounter As %Integer [ InitialExpression = 0 ];
 
@@ -48,10 +48,14 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
         	do hl7.%Save()
         	;w !,mNum," ",hl7.GetValueAt("1:10")
         }
+         
+        // Send to all targets with each iteration.
+        for i=1:1:$length(..TargetConfigNames,",") {
+	        set target=$piece(..TargetConfigNames,",",i)
+        	do ..SendRequestAsync(target,hl7)
+        	set ..%SessionId=""
+        }
         
-        // Send..
-        do ..SendRequestAsync(..TargetConfigName,hl7)
-        set ..%SessionId=""
         
     
     } while ..MessageCounter<(..MessageVolume) 
