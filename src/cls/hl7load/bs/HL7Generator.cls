@@ -1,4 +1,4 @@
-Class ge.bs.HL7Generator Extends Ens.BusinessService
+Class hl7load.bs.HL7Generator Extends Ens.BusinessService
 {
 
 Parameter ADAPTER = "Ens.InboundAdapter";
