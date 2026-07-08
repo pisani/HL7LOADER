@@ -25,8 +25,8 @@ Property MessageCounter As %Integer [ InitialExpression = 0 ];
 
 Property MessageBatch As %String [ InitialExpression = {"BATCH"_$TR($zt($P($h,",",2),1),":")} ];
 
-/// Internal Samplel messages class with HL7 messages under XDATA block to be used for testing
-Property SampleMessagesClass As %String [ InitialExpression = "HL7Loader.hl7.samples.cls" ];
+/// Internal Sample messages class with HL7 messages under XDATA block to be used for testing
+Property SampleMessagesClass As %String [ InitialExpression = "HL7Loader.hl7.samples" ];
 
 Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %RegisteredObject) As %Status
 {
