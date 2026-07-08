@@ -22,7 +22,7 @@ XData ProductionDefinition
     <Setting Target="Adapter" Name="IPAddress">localhost</Setting>
     <Setting Target="Adapter" Name="Port">9004</Setting>
   </Item>
-  <Item Name="test.Distribute" Category="" ClassName="test.Distribute" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  <Item Name="ProcessHL7Message" Category="" ClassName="HL7Loader.bpl.DistributeBPL" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
   </Item>
   <Item Name="TCPIn_1" Category="" ClassName="EnsLib.HL7.Service.TCPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
     <Setting Target="Adapter" Name="Port">9001</Setting>
@@ -43,12 +43,6 @@ XData ProductionDefinition
     <Setting Target="Adapter" Name="Port">9004</Setting>
     <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
     <Setting Target="Host" Name="TargetConfigNames">test.ProcessHL7Message</Setting>
-  </Item>
-  <Item Name="test.MSGGenerator" Category="" ClassName="test.MSGGenerator" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
-    <Setting Target="Host" Name="MessageCount">10</Setting>
-    <Setting Target="Adapter" Name="CallInterval">100</Setting>
-  </Item>
-  <Item Name="test.ProcessHL7Message" Category="" ClassName="test.ProcessHL7Message" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
   </Item>
 </Production>
 }
