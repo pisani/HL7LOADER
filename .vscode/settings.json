@@ -2,7 +2,7 @@
 	"objectscript.conn": {
         "server": "local",
         "ns": "USER",
-        "active": false
+        "active": true
     },
     "objectscript.export": {
         "folder": "src",
