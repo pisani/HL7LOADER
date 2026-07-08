@@ -3,5 +3,17 @@
         "server": "i4hdemo_dev",
         "ns": "HL7LOADER",
         "active": true
+    },
+    "objectscript.export": {
+        "folder": "src",
+        "addCategory": true,
+        "map": {},
+        "atelier": true,
+        "generated": false,
+        "filter": "",
+        "exactFilter": "",
+        "category": "*",
+        "maxConcurrentConnections": 0,
+        "mapped": true
     }
     }
