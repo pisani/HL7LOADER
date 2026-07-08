@@ -2,6 +2,18 @@
 	"objectscript.conn": {
         "server": "local",
         "ns": "USER",
-        "active": true
+        "active": false
+    },
+    "objectscript.export": {
+        "folder": "src",
+        "addCategory": true,
+        "map": {},
+        "atelier": true,
+        "generated": false,
+        "filter": "",
+        "exactFilter": "",
+        "category": "*",
+        "maxConcurrentConnections": 0,
+        "mapped": true
     }
     }
