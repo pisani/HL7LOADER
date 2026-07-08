@@ -1,7 +1,7 @@
 {
-    "objectscript.conn": {
+	"objectscript.conn": {
         "server": "i4hdemo_dev",
         "ns": "HL7LOADER",
         "active": true
     }
-}
+    }
