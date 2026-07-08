@@ -3,7 +3,7 @@ Class HL7Loader.bs.HL7Generator Extends Ens.BusinessService
 
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigNames:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
+Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,TargetConfigNames:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,SampleMessagesClass:Basic,DocType:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
 
 Property MessageVolume As %Integer(MINVAL = 1) [ InitialExpression = 1 ];
 
@@ -25,6 +25,7 @@ Property MessageCounter As %Integer [ InitialExpression = 0 ];
 
 Property MessageBatch As %String [ InitialExpression = {"BATCH"_$TR($zt($P($h,",",2),1),":")} ];
 
+/// Internal Samplel messages class with HL7 messages under XDATA block to be used for testing
 Property SampleMessagesClass As %String [ InitialExpression = "HL7Loader.hl7.samples.cls" ];
 
 Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %RegisteredObject) As %Status
