@@ -3,7 +3,7 @@ Class HL7Loader.bs.HL7Generator Extends Ens.BusinessService
 
 Parameter ADAPTER = "Ens.InboundAdapter";
 
-Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,Targets:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId}:Basic,SampleMessagesClass:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
+Parameter SETTINGS = "MessageVolume:Basic,MessageSendDelay:Basic,Targets:Basic:selector?context={Ens.ContextSearch/ProductionItems?targets=1&productionName=@productionId},SampleMessagesClass:Basic,XDataBlockName:Basic, IncrementMessageID:Basic";
 
 Property MessageVolume As %String [ InitialExpression = 1 ];
 
@@ -79,7 +79,7 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
                 do hl7.%Save()
             }
             
-            do ..ProcessMessageBeforeDispatch(.hl7,XDataItem)
+            do ..OnBeforeDispatch(.hl7,XDataItem)
             do hl7.%Save()
             
             
@@ -92,7 +92,7 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
         }        
     
         // Continue if we have sent enough of this type.
-        if ..MessageVolDistrib(XDataItem)=+$get(..MessageCounter(XDataItem)) set ..MessageVolDistrib(XDataItem)="done"
+        if +$g(..MessageVolDistrib(XDataItem))=$get(..MessageCounter(XDataItem)) set ..MessageVolDistrib(XDataItem)="done"
 
     } while ..MessageCounter<(..MessageVolDistrib) 
     
@@ -106,13 +106,16 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
     Quit $$$OK
 }
 
-Method ProcessMessageBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message, XDataItem As %String = "") As %Status
+/// Override this method to perform any pre-dispatch processing of ANY of the loaded HL7 messages.
+/// This method is called for each message before it is sent to the target(s). The HL7 message is passed by reference and can be modified in place. 
+/// The XDataItem parameter indicates which XData block the message was loaded from.    
+/// NOTE:  HL7 MessageID is automatically incremented with each message and does not need to be done.
+/// Use this method to (for example) randamise Patient or Provider name, or, Number of OBX segments and values.
+Method OnBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message, XDataItem As %String = "") As %Status
 {
 
-	set currentIteration =..MessageCounter
 	if XDataItem = "ORUR01" {
-		// Vary the message sample in xdata block ORUR01
-		
+		// Perform Basic message variations	
 		do hl7.SetValueAt($translate($zdt($h,3)," -:",""),"PIDgrpgrp(1).ORCgrpgrp(1).OBR:ObservationDateTime")
 		
 		// Add random results
