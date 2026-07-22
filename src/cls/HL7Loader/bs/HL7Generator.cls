@@ -10,7 +10,9 @@ Property MessageVolume As %String [ InitialExpression = 1 ];
 Property MessageSendDelay As %Integer(MINVAL = 0) [ InitialExpression = 1 ];
 
 /// Name(S) of XDATA Block in this class to populate an HL7 message with. Requires corresponding PokeDocType configuration setting.
-Property XDataBlockName As %String;
+Property XDataBlockName As %String(MAXLEN="");
+
+Property CleanXDataBlockNames as %String(MAXLEN="");
 
 /// increment message header ID with each transmission
 Property IncrementMessageID As %Boolean [ InitialExpression = 1 ];
@@ -31,50 +33,55 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
 {
     hang ..MessageSendDelay   
     
-    KILL ..MessageCounter  set ..MessageCounter=0
-    
+    KILL ..MessageCounter  
+    set ..MessageCounter=0
     set ..MessageVolDistrib=0
+    
+    set xx=($TR(..XDataBlockName,$C(10),"$"))  ; Add true line seperator
+    set xx=$tr(xx,",","")  ; remove commas
+    set ..CleanXDataBlockNames=$tr(xx,"$",",") ; put in commas for true item distinction
+    $$$TRACE(xx)
 
     // Cater for Split message count by type
     if ..MessageVolume["," {
         
-        for block=1:1:$length(..XDataBlockName,",") {
-            set ..MessageVolDistrib($piece(..XDataBlockName,",",block))=+$piece(..MessageVolume,",",block)
-            set ..MessageVolDistrib=$g(..MessageVolDistrib)+$piece(..MessageVolume,",",block)
+        for block=1:1:$length(..CleanXDataBlockNames,",") {
+            set itemCount=+$piece(..MessageVolume,",",block),itemCount=$select(itemCount<1:"done",1:itemCount)
+
+            set ..MessageVolDistrib($piece(..CleanXDataBlockNames,",",block))=itemCount
+            set ..MessageVolDistrib=$g(..MessageVolDistrib)+(+itemCount) 
         }
     } else {
-        set ..MessageVolDistrib=..MessageVolume
+        set ..MessageVolDistrib=..MessageVolume  ; if not sending different per Message volumes, then the total = MessagVolume
     }
-
+    
     set crlf=$C(13,10)
     set SampleMessagesClass=..SampleMessagesClass set:SampleMessagesClass="" SampleMessagesClass=..%ClassName(1)
 
     do {
 	
-        for block=1:1:$length(..XDataBlockName,",") {
+        for block=1:1:$length(..CleanXDataBlockNames,",") {
             set stream=""
-            set XDataItem=$piece(..XDataBlockName,",",block) 
-
-            continue:$get(..MessageVolDistrib(XDataItem))="done"  ; skip if we have sent enough of this type.
+            set XDataItem=$piece(..CleanXDataBlockNames,",",block) 
 
             set stream=##class(%Dictionary.XDataDefinition).%OpenId(SampleMessagesClass_"||"_XDataItem)
             if '$IsObject(stream) {
                 $$$LOGALERT("XData Block "_XDataItem_" not found in class "_SampleMessagesClass) 
-                set ..MessageVolDistrib(XDataItem)="done"
                 continue
             }
+
+            continue:$get(..MessageVolDistrib(XDataItem))="done"  ; skip if we have sent enough of this type.
+            $$$TRACE("Processing "_XDataItem_" in loop: "_(..MessageCounter+1) )
 
             set hl7=##class(EnsLib.HL7.Message).ImportFromLibraryStream(stream.Data)
             
             set DocType=hl7.GetValueAt("1:12.1")_":"_$e(XDataItem,1,3)_"_"_$e(XDataItem,4,6) 
             do hl7.PokeDocType(DocType)  
 
-            set ..MessageCounter=..MessageCounter+1
-            set ..MessageCounter(XDataItem)=$get(..MessageCounter(XDataItem))+1
 
             // Incremenet Mesage ControlID 
             if ..IncrementMessageID {
-                set mNum=$tr($j(..MessageCounter,$l(..MessageVolume)+1)," ","0")
+                set mNum=$tr($j(..MessageCounter,$l(..MessageVolume)+1)," ","0")  //<fix this
                 do hl7.SetValueAt(..MessageBatch_"."_mNum,"MSH:10")
                 do hl7.%Save()
             }
@@ -83,23 +90,27 @@ Method OnProcessInput(pInput As %RegisteredObject, Output pOutput As %Registered
             do hl7.%Save()
             
             
-            // Send to all targets with each iteration.
+            // Send to all BUSINESS HOST targets with each iteration.
             for i=1:1:$length(..Targets,",") {
                 set target=$piece(..Targets,",",i)
                 do ..SendRequestAsync(target,hl7)
                 set ..%SessionId=""
             }
+
+            set ..MessageCounter=..MessageCounter+1  ; add overall counter sent
+            set ..MessageCounter(XDataItem)=$get(..MessageCounter(XDataItem))+1  ; add counter by XDataItem
+
         }        
     
-        // Continue if we have sent enough of this type.
+        // if we have sent enough of this type, mark it as done for the next loop.
         if +$g(..MessageVolDistrib(XDataItem))=$get(..MessageCounter(XDataItem)) set ..MessageVolDistrib(XDataItem)="done"
 
-    } while ..MessageCounter<(..MessageVolDistrib) 
+    } while ..MessageCounter<(..MessageVolDistrib-1)
     
     /// disable item once done.
 	hang ..MessageSendDelay
     Do ##class(Ens.Director).EnableConfigItem(..%ConfigName,0,1) 
-   
+    hang 2
     KILL ..MessageCounter
     set ..MessageCounter=0
 
