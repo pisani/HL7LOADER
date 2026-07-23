@@ -10,9 +10,9 @@ Property MessageVolume As %String [ InitialExpression = 1 ];
 Property MessageSendDelay As %Integer(MINVAL = 0) [ InitialExpression = 1 ];
 
 /// Name(S) of XDATA Block in this class to populate an HL7 message with. Requires corresponding PokeDocType configuration setting.
-Property XDataBlockName As %String(MAXLEN="");
+Property XDataBlockName As %String(MAXLEN = "");
 
-Property CleanXDataBlockNames as %String(MAXLEN="");
+Property CleanXDataBlockNames As %String(MAXLEN = "");
 
 /// increment message header ID with each transmission
 Property IncrementMessageID As %Boolean [ InitialExpression = 1 ];
@@ -157,4 +157,5 @@ ClassMethod OnGetConnections(Output pArray As %String, pItem As Ens.Config.Item)
         }
     }
 }
+
 }
