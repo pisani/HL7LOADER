@@ -27,7 +27,7 @@ Method OnBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message, XDataItem As %String = 
     
     // Remove existing OBX segments
     for i=1:1:hl7.GetValueAt("PIDgrpgrp(1).ORCgrp(1).OBXgrp(*)") {
-        do hl7.RemoveValueAt("PIDgrpgrp(1).ORCgrp(1).OBXgrp("_i_").OBX")
+        do hl7.RemoveSegmentAt("PIDgrpgrp(1).ORCgrp(1).OBXgrp("_i_").OBX")
     }
 
     set pdfStream=##class(%Stream.FileBinary).%New()
@@ -45,14 +45,14 @@ Method OnBeforeDispatch(ByRef hl7 As EnsLib.HL7.Message, XDataItem As %String = 
     } 
 
     do pdfStream.Rewind()
-    set cleanFilename=$zstrip($zstrip(pdfStream.FileName,"L","/"),"L",".")
+    set cleanFilename=##class(%File).GetFilename(pdfStream.Filename)
 
     set obxStart=hl7.GetValueAt("PIDgrpgrp(1).ORCGrp(1).OBXgrp(*)")+1
 
     ; in Chunks:
+    set base64=##class(%SYSTEM.Encryption).Base64EncodeStream(pdfStream)
     for idOBX=obxStart:1 {
-        set pdfPart=pdfStream.Read(65536) quit:pdfPart=""
-        set pdfPart=$System.Encryption.Base64Encode(pdfPart,1)
+        set pdfPart=base64.Read(30000) quit:pdfPart=""
         // set OBX properties
         do hl7.SetValueAt(idOBX,"PIDgrpgrp(1).ORCgrp(1).OBXgrp("_idOBX_").OBX:SetIDOBX")
         do hl7.SetValueAt("ED","PIDgrpgrp(1).ORCgrp(1).OBXgrp("_idOBX_").OBX:2")
