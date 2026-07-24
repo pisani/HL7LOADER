@@ -2,6 +2,6 @@
     "objectscript.conn": {
         "server": "irishealthrc",
         "ns": "HL7LOADER",
-        "active": true
+        "active": false
     }
 }
