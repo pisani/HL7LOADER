@@ -1,7 +1,19 @@
 {
-    "objectscript.conn": {
-        "server": "irishealthrc",
-        "ns": "HL7LOADER",
+	"objectscript.conn": {
+        "server": "local",
+        "ns": "USER",
         "active": false
+    },
+    "objectscript.export": {
+        "folder": "src",
+        "addCategory": true,
+        "map": {},
+        "atelier": true,
+        "generated": false,
+        "filter": "",
+        "exactFilter": "",
+        "category": "*",
+        "maxConcurrentConnections": 0,
+        "mapped": true
     }
-}
+    }
