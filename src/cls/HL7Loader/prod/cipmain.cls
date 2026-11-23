@@ -19,7 +19,7 @@ ClassMethod OnConfigChange(pProduction As Ens.Config.Production, pItem As Ens.Co
     if setting.Name="ReArm",setting.Value=1 {
       // Enable all HL7 Generator services.
       do ..QueueReArm(pProduction)
-      job ##class(HL7Loader.prod.main).resetReArm(0)
+      job ##class(HL7Loader.prod.cipmain).resetReArm(0)
     }
   }
 }
