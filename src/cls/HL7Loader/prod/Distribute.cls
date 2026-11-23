@@ -1,36 +1,54 @@
-/// 
-Class test.Distribute Extends Ens.BusinessProcessBPL
+Class HL7Loader.prod.Distribute Extends Ens.Production
 {
 
-/// BPL Definition
-XData BPL [ XMLNamespace = "http://www.intersystems.com/bpl" ]
+XData ProductionDefinition
 {
-<process language='objectscript' request='EnsLib.HL7.Message' response='EnsLib.HL7.Message' height='2000' width='2000' >
-<context>
-<property name='targetBOIdx' type='%String' instantiate='0' >
-<parameters>
-<parameter name='MAXLEN'  value='50' />
-</parameters>
-</property>
-</context>
-<sequence xend='200' yend='450' >
-<code name='get target BO' xpos='200' ypos='250' >
-<![CDATA[ set context.targetBOIdx=(process.%SessionId#4)+1
- ]]>
-</code>
-<call name='Target' target='@("TCPOut_"_context.targetBOIdx)' async='1' xpos='200' ypos='350' >
-<request type='EnsLib.HL7.Message' >
-<assign property="callrequest" value="request" action="set" />
-</request>
-<response type='EnsLib.HL7.Message' />
-</call>
-</sequence>
-</process>
-}
-
-Storage Default
-{
-<Type>%Storage.Persistent</Type>
+<Production Name="HL7Loader.prod.Distribute" LogGeneralTraceEvents="false">
+  <Description></Description>
+  <ActorPoolSize>2</ActorPoolSize>
+  <Item Name="TCPOut_1" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="IPAddress">localhost</Setting>
+    <Setting Target="Adapter" Name="Port">9001</Setting>
+  </Item>
+  <Item Name="TCPOut_2" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="IPAddress">localhost</Setting>
+    <Setting Target="Adapter" Name="Port">9002</Setting>
+  </Item>
+  <Item Name="TCPOut_3" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="IPAddress">localhost</Setting>
+    <Setting Target="Adapter" Name="Port">9003</Setting>
+  </Item>
+  <Item Name="TCPOut_4" Category="" ClassName="EnsLib.HL7.Operation.TCPOperation" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="IPAddress">localhost</Setting>
+    <Setting Target="Adapter" Name="Port">9004</Setting>
+  </Item>
+  <Item Name="test.Distribute" Category="" ClassName="HL7Loader.bpl.DistributeBPL" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+  </Item>
+  <Item Name="TCPIn_1" Category="" ClassName="EnsLib.HL7.Service.TCPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="Port">9001</Setting>
+    <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
+    <Setting Target="Host" Name="TargetConfigNames">TCPOut_1</Setting>
+  </Item>
+  <Item Name="TCPIn_2" Category="" ClassName="EnsLib.HL7.Service.TCPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="Port">9002</Setting>
+    <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
+    <Setting Target="Host" Name="TargetConfigNames">TCPOut_2</Setting>
+  </Item>
+  <Item Name="TCPIn_3" Category="" ClassName="EnsLib.HL7.Service.TCPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="Port">9003</Setting>
+    <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
+    <Setting Target="Host" Name="TargetConfigNames">TCPOut_3</Setting>
+  </Item>
+  <Item Name="TCPIn_4" Category="" ClassName="EnsLib.HL7.Service.TCPService" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="false" Schedule="">
+    <Setting Target="Adapter" Name="Port">9004</Setting>
+    <Setting Target="Host" Name="MessageSchemaCategory">2.5</Setting>
+    <Setting Target="Host" Name="TargetConfigNames">TCPOut_4</Setting>
+  </Item>
+  <Item Name="BasicGenerator" Category="" ClassName="HL7Loader.bs.BasicGenerator" PoolSize="1" Enabled="true" Foreground="false" Comment="" LogTraceEvents="true" Schedule="">
+    <Setting Target="Host" Name="MessageCount">10</Setting>
+    <Setting Target="Adapter" Name="CallInterval">100</Setting>
+  </Item>
+</Production>
 }
 
 }

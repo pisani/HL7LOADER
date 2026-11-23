@@ -1,4 +1,4 @@
-Class HL7Loader.prod.main Extends Ens.Production [ Not ProcedureBlock ]
+Class HL7Loader.prod.cipmain Extends Ens.Production [ Not ProcedureBlock ]
 {
 
 Parameter SETTINGS = "ReArm:ReArm Details,Services:ReArm Details:selector?multiSelect=1&context={Ens.ContextSearch/ProductionItems?services=1&productionName=@productionId}";
@@ -42,14 +42,14 @@ ClassMethod QueueReArm(pProduction)
 
 ClassMethod resetReArm(value)
 {
-  set p=##class(Ens.Config.Production).%OpenId("HL7Loader.prod.main")
+  set p=##class(Ens.Config.Production).%OpenId("HL7Loader.prod.cipmain")
   set ns=1,ns(1)=$lb("Adapter","ReArm",value)
   do p.UpdateSettings(.ns),p.%Save()
 }
 
 XData ProductionDefinition
 {
-<Production Name="HL7Loader.prod.main" TestingEnabled="true" LogGeneralTraceEvents="false">
+<Production Name="HL7Loader.prod.cipmain" TestingEnabled="true" LogGeneralTraceEvents="false">
   <Description>Test Change. Sample to manage HL7 broadcast to target ports</Description>
   <ActorPoolSize>1</ActorPoolSize>
   <Setting Target="Adapter" Name="ReArm">1</Setting>
